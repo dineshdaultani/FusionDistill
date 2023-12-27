@@ -1,0 +1,35 @@
+name: ResNet56_CIFAR10_deg_ensemble
+n_gpu: 1
+model:
+  type: ResNet56
+  args: 
+    deg_flag: deg
+    num_class: 10
+  pretrained_path_jpeg: saved/jpeg/SLTrainer/ResNet56-56_CIFAR10/train/<EXP_STR>/model_best.pth
+  pretrained_path_blur: saved/blur/SLTrainer/ResNet56-56_CIFAR10/train/<EXP_STR>/model_best.pth
+  pretrained_path_noise: saved/noise/SLTrainer/ResNet56-56_CIFAR10/train/<EXP_STR>/model_best.pth
+  pretrained_path_saltpepper: saved/saltpepper/SLTrainer/ResNet56-56_CIFAR10/train/<EXP_STR>/model_best.pth
+data_loader:
+  type: DegCIFAR10DataLoader
+  args:
+    data_dir: data/
+    batch_size: 128
+    shuffle: true
+    validation_split: 0.0
+    num_workers: 2
+    deg_type: jpeg
+loss: 
+  - supervised_loss: CE
+loss_weights: [1.0]
+metrics:
+- accuracy_classes
+trainer:
+  type: IndDATrainer
+  args:
+    epochs: 100
+    save_dir: saved/
+    save_period: 1
+    verbosity: 2
+    monitor: max val_accuracy_deg
+    early_stop: 100
+    tensorboard: true

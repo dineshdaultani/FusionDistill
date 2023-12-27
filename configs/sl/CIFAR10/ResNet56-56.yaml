@@ -1,0 +1,53 @@
+name: ResNet56-56_CIFAR10
+n_gpu: 1
+# random_seed: 0
+teacher_model:
+  type: ResNet56
+  args: 
+    deg_flag: clean
+    num_class: 10
+  pretrained_path: ./saved/jpeg/IndTrainer/ResNet56_CIFAR10_clean/train/<EXP_STR>/model_best.pth
+student_model:
+  type: ResNet56
+  args: 
+    deg_flag: deg
+    num_class: 10
+  pretrained_path: ./saved/jpeg/IndTrainer/ResNet56_CIFAR10_clean/train/<EXP_STR>/model_best.pth
+data_loader:
+  type: DegCIFAR10DataLoader
+  args:
+    data_dir: data/
+    batch_size: 128
+    shuffle: true
+    validation_split: 0.0
+    num_workers: 2
+    deg_type: jpeg
+    cutout_method: Cutout
+    cutout_length: 16
+    cutout_apply_clean: false
+    cutout_apply_deg: true
+optimizer:
+  type: RAdam
+  args:
+    lr: 0.001
+    weight_decay: 0.0001
+loss: 
+  - supervised_loss: CE
+  - inheritance_loss: COS
+loss_weights: [1.0, [0.0, 0.0, 1.0]]
+metrics:
+- accuracy
+lr_scheduler:
+  type: CosineAnnealingLR
+  args:
+    T_max: 100
+trainer:
+  type: SLTrainer
+  args:
+    epochs: 100
+    save_dir: saved/
+    save_period: 1
+    verbosity: 2
+    monitor: max val_accuracy_deg
+    early_stop: 100
+    tensorboard: true
